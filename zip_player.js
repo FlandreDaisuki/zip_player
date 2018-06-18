@@ -49,79 +49,79 @@ function base64ArrayBuffer(arrayBuffer, off, byteLength) {
 }
 
 
-function ZipImagePlayer(options) {
-    this.op = options;
-    this._URL = (window.URL || window.webkitURL || window.MozURL
-                 || window.MSURL);
-    this._Blob = (window.Blob || window.WebKitBlob || window.MozBlob
-                  || window.MSBlob);
-    this._BlobBuilder = (window.BlobBuilder || window.WebKitBlobBuilder
-                         || window.MozBlobBuilder || window.MSBlobBuilder);
-    this._Uint8Array = (window.Uint8Array || window.WebKitUint8Array
-                        || window.MozUint8Array || window.MSUint8Array);
-    this._DataView = (window.DataView || window.WebKitDataView
-                      || window.MozDataView || window.MSDataView);
-    this._ArrayBuffer = (window.ArrayBuffer || window.WebKitArrayBuffer
-                         || window.MozArrayBuffer || window.MSArrayBuffer);
-    this._maxLoadAhead = 0;
-    if (!this._URL) {
-        this._debugLog("No URL support! Will use slower data: URLs.");
-        // Throttle loading to avoid making playback stalling completely while
-        // loading images...
-        this._maxLoadAhead = 10;
-    }
-    if (!this._Blob) {
-        this._error("No Blob support");
-    }
-    if (!this._Uint8Array) {
-        this._error("No Uint8Array support");
-    }
-    if (!this._DataView) {
-        this._error("No DataView support");
-    }
-    if (!this._ArrayBuffer) {
-        this._error("No ArrayBuffer support");
-    }
-    this._isSafari = Object.prototype.toString.call(
-                         window.HTMLElement).indexOf('Constructor') > 0;
-    this._loadingState = 0;
-    this._dead = false;
-    this._context = options.canvas.getContext("2d");
-    this._files = {};
-    this._frameCount = this.op.metadata.frames.length;
-    this._debugLog("Frame count: " + this._frameCount);
-    this._frame = 0;
-    this._loadFrame = 0;
-    this._frameImages = [];
-    this._paused = false;
-    this._loadTimer = null;
-    this._startLoad();
-    if (this.op.autoStart) {
-        this.play();
-    } else {
-        this._paused = true;
-    }
-}
+class ZipImagePlayer {
+    constructor(options) {
+        this.op = options;
+        this._URL = (window.URL || window.webkitURL || window.MozURL
+            || window.MSURL);
+        this._Blob = (window.Blob || window.WebKitBlob || window.MozBlob
+            || window.MSBlob);
+        this._BlobBuilder = (window.BlobBuilder || window.WebKitBlobBuilder
+            || window.MozBlobBuilder || window.MSBlobBuilder);
+        this._Uint8Array = (window.Uint8Array || window.WebKitUint8Array
+            || window.MozUint8Array || window.MSUint8Array);
+        this._DataView = (window.DataView || window.WebKitDataView
+            || window.MozDataView || window.MSDataView);
+        this._ArrayBuffer = (window.ArrayBuffer || window.WebKitArrayBuffer
+            || window.MozArrayBuffer || window.MSArrayBuffer);
+        this._maxLoadAhead = 0;
+        if (!this._URL) {
+            this._debugLog("No URL support! Will use slower data: URLs.");
+            // Throttle loading to avoid making playback stalling completely while
+            // loading images...
+            this._maxLoadAhead = 10;
+        }
+        if (!this._Blob) {
+            this._error("No Blob support");
+        }
+        if (!this._Uint8Array) {
+            this._error("No Uint8Array support");
+        }
+        if (!this._DataView) {
+            this._error("No DataView support");
+        }
+        if (!this._ArrayBuffer) {
+            this._error("No ArrayBuffer support");
+        }
+        this._isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+        this._loadingState = 0;
+        this._dead = false;
+        this._context = options.canvas.getContext("2d");
+        this._files = {};
+        this._frameCount = this.op.metadata.frames.length;
+        this._trailerBytes= 30000;
+        this._failed= false;
+        this._debugLog("Frame count: " + this._frameCount);
+        this._frame = 0;
+        this._loadFrame = 0;
+        this._frameImages = [];
+        this._paused = false;
+        this._loadTimer = null;
+        this._startLoad();
+        if (this.op.autoStart) {
+            this.play();
+        }
+        else {
+            this._paused = true;
+        }
 
-ZipImagePlayer.prototype = {
-    _trailerBytes: 30000,
-    _failed: false,
-    _mkerr: function(msg) {
+    }
+    _mkerr(msg) {
         var _this = this;
         return function() {
             _this._error(msg);
         }
-    },
-    _error: function(msg) {
+    }
+    _error(msg) {
         this._failed = true;
         throw Error("ZipImagePlayer error: " + msg);
-    },
-    _debugLog: function(msg) {
+    }
+    _debugLog(msg) {
         if (this.op.debug) {
             console.log(msg);
         }
-    },
-    _load: function(offset, length, callback) {
+    }
+    _load(offset, length, callback) {
         var _this = this;
         // Unfortunately JQuery doesn't support ArrayBuffer XHR
         var xhr = new XMLHttpRequest();
@@ -168,8 +168,8 @@ ZipImagePlayer.prototype = {
         }
         /*this._debugLog("Load: " + offset + " " + length);*/
         xhr.send();
-    },
-    _startLoad: function() {
+    }
+    _startLoad() {
         var _this = this;
         if (!this.op.source) {
             // Unpacked mode (individiual frame URLs) - just load the frames.
@@ -211,8 +211,8 @@ ZipImagePlayer.prototype = {
                 _this._findCentralDirectory();
             });
         }).fail(this._mkerr("Length fetch failed"));
-    },
-    _findCentralDirectory: function() {
+    }
+    _findCentralDirectory() {
         // No support for ZIP file comment
         var dv = new this._DataView(this._buf, this._len - 22, 22);
         if (dv.getUint32(0, true) != 0x06054b50) {
@@ -229,8 +229,8 @@ ZipImagePlayer.prototype = {
         } else {
             this._readCentralDirectory(cd_off, cd_size, cd_count);
         }
-    },
-    _readCentralDirectory: function(offset, size, count) {
+    }
+    _readCentralDirectory(offset, size, count) {
         var dv = new this._DataView(this._buf, offset, size);
         var p = 0;
         for (var i = 0; i < count; i++ ) {
@@ -267,8 +267,8 @@ ZipImagePlayer.prototype = {
             this._loadNextChunk();
             this._loadNextChunk();
         }
-    },
-    _loadNextChunk: function() {
+    }
+    _loadNextChunk() {
         if (this._pFetch >= this._pTail) {
             return;
         }
@@ -300,14 +300,14 @@ ZipImagePlayer.prototype = {
             }
             this._loadNextChunk();
         });
-    },
-    _fileDataStart: function(offset) {
+    }
+    _fileDataStart(offset) {
         var dv = new DataView(this._buf, offset, 30);
         var nameLen = dv.getUint16(26, true);
         var extraLen = dv.getUint16(28, true);
         return offset + 30 + nameLen + extraLen;
-    },
-    _isFileAvailable: function(name) {
+    }
+    _isFileAvailable(name) {
         var info = this._files[name];
         if (!info) {
             this._error("File " + name + " not found in ZIP");
@@ -316,8 +316,8 @@ ZipImagePlayer.prototype = {
             return false;
         }
         return this._pHead >= (this._fileDataStart(info.off) + info.len);
-    },
-    _loadNextFrame: function() {
+    }
+    _loadNextFrame() {
         if (this._dead) {
             return;
         }
@@ -368,8 +368,8 @@ ZipImagePlayer.prototype = {
                    + base64ArrayBuffer(this._buf, off, end - off));
             this._loadImage(frame, url, false);
         }
-    },
-    _loadImage: function(frame, url, isBlob) {
+    }
+    _loadImage(frame, url, isBlob) {
         var _this = this;
         var image = new Image();
         var meta = this.op.metadata.frames[frame];
@@ -403,14 +403,14 @@ ZipImagePlayer.prototype = {
             }
         });
         image.src = url;
-    },
-    _setLoadingState: function(state) {
+    }
+    _setLoadingState(state) {
         if (this._loadingState != state) {
             this._loadingState = state;
             $(this).triggerHandler("loadingStateChanged", [state]);
         }
-    },
-    _displayFrame: function() {
+    }
+    _displayFrame() {
         if (this._dead) {
             return;
         }
@@ -444,8 +444,8 @@ ZipImagePlayer.prototype = {
                 _this._nextFrame.apply(_this);
             }, meta.delay);
         }
-    },
-    _nextFrame: function(frame) {
+    }
+    _nextFrame(frame) {
         if (this._frame >= (this._frameCount - 1)) {
             if (this.op.loop) {
                 this._frame = 0;
@@ -457,8 +457,8 @@ ZipImagePlayer.prototype = {
             this._frame += 1;
         }
         this._displayFrame();
-    },
-    play: function() {
+    }
+    play() {
         if (this._dead) {
             return;
         }
@@ -467,8 +467,8 @@ ZipImagePlayer.prototype = {
             this._paused = false;
             this._displayFrame();
         }
-    },
-    pause: function() {
+    }
+    pause() {
         if (this._dead) {
             return;
         }
@@ -479,8 +479,8 @@ ZipImagePlayer.prototype = {
             this._paused = true;
             $(this).triggerHandler("pause", [this._frame]);
         }
-    },
-    rewind: function() {
+    }
+    rewind() {
         if (this._dead) {
             return;
         }
@@ -489,8 +489,8 @@ ZipImagePlayer.prototype = {
             clearTimeout(this._timer);
         }
         this._displayFrame();
-    },
-    stop: function() {
+    }
+    stop() {
         this._debugLog("Stopped!");
         this._dead = true;
         if (this._timer) {
@@ -503,17 +503,17 @@ ZipImagePlayer.prototype = {
         this._buf = null;
         this._bytes = null;
         $(this).triggerHandler("stop");
-    },
-    getCurrentFrame: function() {
+    }
+    getCurrentFrame() {
         return this._frame;
-    },
-    getLoadedFrames: function() {
+    }
+    getLoadedFrames() {
         return this._frameImages.length;
-    },
-    getFrameCount: function() {
+    }
+    getFrameCount() {
         return this._frameCount;
-    },
-    hasError: function() {
+    }
+    hasError() {
         return this._failed;
     }
 }
