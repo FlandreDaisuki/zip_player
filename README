@@ -11,7 +11,7 @@ individual URLs (e.g. data: URLs for client-side preview purposes).
 
 == Dependencies ==
 
-jQuery (zip_player uses jQuery for event dispatch).
+no
 
 == Usage ==
 
@@ -22,33 +22,27 @@ Range support).
 == Browser compatibility ==
 
 - Any recent Chrome or Firefox
-- Safari 7+
-- IE 10+
-- iOS 5+ (6+ recommended, 5 is slow due to lack of Blob URL support)
-- Android browser 4.0+
+- Safari 7+ (?)
+- IE 10+ (?)
+- iOS 5+ (6+ recommended, 5 is slow due to lack of Blob URL support) (?)
+- Android browser 4.0+ (?)
 
 == Testing ==
 
-To run the tests manually, open test/test.html under a web browser. You need to
-serve it from a web server with Range support. The test suite uses mocha.js.
-
-To run the automated test suite, you need Node, PhantomJS, and the following
-dependencies:
-
-$ npm install -g connect mocha-phantomjs
-
-Run test/test.sh to run the automated test suite. It will automatically start
-a test web server, run the tests, and shut down the server. You may need to edit
-test/test.sh for your particular system's installation paths.
+```
+$ npm i
+$ npm run debug
+```
 
 == License ==
+Modified by FlandreDaisuki Copyright (c) 2018
 
 zip_player is Copyright (c) 2014 Pixiv Inc.
 
 zip_player is licensed under the MIT License.
 See the LICENSE file for full license text.
 
-Note: The license does not apply to third-party JavaScript and test images in 
+Note: The license does not apply to third-party JavaScript and test images in
 the test/ directory. Those belong to their respective owners:
   - hon.zip and hon/ are public domain
   - big_buck_bunny[_jpg].zip is licensed under CC-BY 3.0:
