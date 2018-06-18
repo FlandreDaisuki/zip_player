@@ -1,0 +1,28 @@
+{
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 8
+  },
+  "extends": ["eslint:recommended"],
+  "rules": {
+    "no-console": "off",
+    "key-spacing": "error",
+    "indent": ["error", 2],
+    "comma-spacing": "error",
+    "arrow-spacing": "error",
+    "keyword-spacing": "error",
+    "space-infix-ops": "error",
+    "semi": ["error", "always"],
+    "object-curly-spacing": ["error", "always"],
+    "space-before-blocks": "error",
+    "space-before-function-paren": ["error", "never"],
+    "prefer-const": "error",
+    "prefer-template": "error",
+    "prefer-arrow-callback": "error",
+    "prefer-spread": "error"
+  }
+}
